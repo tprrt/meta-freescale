@@ -5,8 +5,8 @@ DEPENDS = "zlib-native openssl-native"
 SRC_URI = "git://github.com/nxp-imx/imx-mkimage.git;protocol=https;branch=${SRCBRANCH} \
            file://0001-iMX8M-soc.mak-use-native-mkimage-from-sysroot.patch \
 "
-SRCBRANCH = "lf-5.15.71_2.2.0"
-SRCREV = "3bfcfccb71ddf894be9c402732ccb229fe72099e"
+SRCBRANCH = "lf-6.1.22_2.0.0"
+SRCREV = "5cfd218012e080fb907d9cc301fbb4ece9bc17a9"
 
 S = "${WORKDIR}/git"
 
