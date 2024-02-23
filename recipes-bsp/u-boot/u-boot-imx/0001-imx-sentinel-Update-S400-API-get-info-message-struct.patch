@@ -1,0 +1,33 @@
+From 355dbd39e22f5a2aa3b3e39619d1cc23d84f61e1 Mon Sep 17 00:00:00 2001
+From: Ye Li <ye.li@nxp.com>
+Date: Mon, 19 Dec 2022 17:45:17 +0800
+Subject: [PATCH] imx: sentinel: Update S400 API get info message structure
+
+From Sentinel FW v0.0.9-9df0f503, the response message of get info API
+is changed to add OEM SRK and some states (IMEM, CSAL, TRNG).
+With old structure, we get failure from sentinel due to the buffer
+size can't fit with new response message. So update the API structure
+to fix the issue.
+
+Signed-off-by: Ye Li <ye.li@nxp.com>
+Reviewed-by: Peng Fan <peng.fan@nxp.com>
+---
+ arch/arm/include/asm/mach-imx/s400_api.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm/include/asm/mach-imx/s400_api.h b/arch/arm/include/asm/mach-imx/s400_api.h
+index cb6e393b9d1f..5582ff1a2540 100644
+--- a/arch/arm/include/asm/mach-imx/s400_api.h
++++ b/arch/arm/include/asm/mach-imx/s400_api.h
+@@ -126,6 +126,8 @@ struct sentinel_get_info_data {
+ 	u32 uid[4];
+ 	u32 sha256_rom_patch[8];
+ 	u32 sha_fw[8];
++	u32 oem_srkh[16];
++	u32 state;
+ };
+ 
+ int ahab_release_rdc(u8 core_id, u8 xrdc, u32 *response);
+-- 
+2.43.2
+

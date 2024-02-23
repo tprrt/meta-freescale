@@ -1,0 +1,90 @@
+From 3aadf911b2039cd7389f352bb36874ccc44bf7c8 Mon Sep 17 00:00:00 2001
+From: Ye Li <ye.li@nxp.com>
+Date: Fri, 17 Jun 2022 10:46:39 +0800
+Subject: [PATCH] misc: sentinel: s400_api: Add get_events API
+
+Add get_events API to retrieve any singular events that has occurred
+since the FW has started from sentinel
+
+Signed-off-by: Ye Li <ye.li@nxp.com>
+Reviewed-by: Peng Fan <peng.fan@nxp.com>
+---
+ arch/arm/include/asm/mach-imx/s400_api.h |  2 ++
+ drivers/misc/sentinel/s400_api.c         | 45 ++++++++++++++++++++++++
+ 2 files changed, 47 insertions(+)
+
+diff --git a/arch/arm/include/asm/mach-imx/s400_api.h b/arch/arm/include/asm/mach-imx/s400_api.h
+index 89fa373d06ff..30e3e46ed53a 100644
+--- a/arch/arm/include/asm/mach-imx/s400_api.h
++++ b/arch/arm/include/asm/mach-imx/s400_api.h
+@@ -18,6 +18,7 @@
+ #define AHAB_FWD_LIFECYCLE_UP_REQ_CID   0x95
+ #define AHAB_READ_FUSE_REQ_CID	0x97
+ #define AHAB_GET_FW_VERSION_CID	0x9D
++#define AHAB_GET_EVENTS_REQ_CID 0xA2
+ #define AHAB_RELEASE_RDC_REQ_CID   0xC4
+ #define AHAB_GET_FW_STATUS_CID   0xC5
+ #define AHAB_WRITE_FUSE_REQ_CID	0xD6
+@@ -56,5 +57,6 @@ int ahab_dump_buffer(u32 *buffer, u32 buffer_length);
+ int ahab_get_info(struct sentinel_get_info_data *info, u32 *response);
+ int ahab_get_fw_status(u32 *status, u32 *response);
+ int ahab_release_m33_trout(void);
++int ahab_get_events(u32 *events, u32 *events_cnt, u32 *response);
+ 
+ #endif
+diff --git a/drivers/misc/sentinel/s400_api.c b/drivers/misc/sentinel/s400_api.c
+index 65032f773621..c6b4ef57b225 100644
+--- a/drivers/misc/sentinel/s400_api.c
++++ b/drivers/misc/sentinel/s400_api.c
+@@ -445,3 +445,48 @@ int ahab_release_m33_trout(void)
+ 
+ 	return ret;
+ }
++
++int ahab_get_events(u32 *events, u32 *events_cnt, u32 *response)
++{
++	struct udevice *dev = gd->arch.s400_dev;
++	int size = sizeof(struct sentinel_msg);
++	struct sentinel_msg msg;
++	int ret, i = 0;
++	u32 actual_events;
++
++	if (!dev) {
++		printf("s400 dev is not initialized\n");
++		return -ENODEV;
++	}
++
++	if (!events || !events_cnt || *events_cnt == 0) {
++		printf("Invalid parameters for %s\n", __func__);
++		return -EINVAL;
++	}
++
++	msg.version = AHAB_VERSION;
++	msg.tag = AHAB_CMD_TAG;
++	msg.size = 1;
++	msg.command = AHAB_GET_EVENTS_REQ_CID;
++
++	ret = misc_call(dev, false, &msg, size, &msg, size);
++	if (ret)
++		printf("Error: %s: ret %d, response 0x%x\n",
++		       __func__, ret, msg.data[0]);
++
++	if (response)
++		*response = msg.data[0];
++
++	if (!ret) {
++		actual_events = msg.data[1] & 0xffff;
++		if (*events_cnt < actual_events)
++			actual_events = *events_cnt;
++
++		for (; i < actual_events; i++)
++			events[i] = msg.data[i + 2];
++
++		*events_cnt = actual_events;
++	}
++
++	return ret;
++}
+-- 
+2.43.2
+

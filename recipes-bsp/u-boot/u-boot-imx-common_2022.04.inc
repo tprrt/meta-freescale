@@ -3,7 +3,9 @@ DESCRIPTION = "i.MX U-Boot suppporting i.MX reference boards."
 LICENSE = "GPL-2.0-or-later"
 LIC_FILES_CHKSUM = "file://Licenses/gpl-2.0.txt;md5=b234ee4d69f5fce4486a80fdaf4a4263"
 
-SRC_URI = "git://github.com/nxp-imx/uboot-imx.git;protocol=https;branch=${SRCBRANCH}"
+SRC_URI = "git://github.com/nxp-imx/uboot-imx.git;protocol=https;branch=${SRCBRANCH} \
+    file://0001-misc-sentinel-s400_api-Add-get_events-API.patch \
+    file://0001-imx-sentinel-Update-S400-API-get-info-message-struct.patch"
 SRCBRANCH = "lf_v2022.04"
 LOCALVERSION ?= "-imx_v2022.04_5.15.71-2.2.0"
 SRCREV = "181859317bfafef1da79c59a4498650168ad9df6"
